@@ -17,6 +17,7 @@ const Dashboard = () => {
       name: "Project Proposal.pdf",
       size: "2.4 MB",
       type: "application/pdf",
+      uploadedAt: "Dec 18, 2024",
       expiry: "6 days",
       downloads: 12,
       shortUrl: "https://fileshare.co/a1b2c3"
@@ -26,6 +27,7 @@ const Dashboard = () => {
       name: "Design Mockups.zip",
       size: "15.8 MB",
       type: "application/zip",
+      uploadedAt: "Dec 20, 2024",
       expiry: "4 days",
       downloads: 5,
       shortUrl: "https://fileshare.co/d4e5f6"
@@ -35,6 +37,7 @@ const Dashboard = () => {
       name: "Screenshot 2024.png",
       size: "892 KB",
       type: "image/png",
+      uploadedAt: "Dec 22, 2024",
       expiry: "2 days",
       downloads: 23,
       shortUrl: "https://fileshare.co/g7h8i9"

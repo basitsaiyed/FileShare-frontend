@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +13,7 @@ interface FileCardProps {
     name: string;
     size: string;
     type: string;
+    uploadedAt: string;
     expiry: string;
     downloads: number;
     shortUrl: string;
@@ -93,6 +93,11 @@ const FileCard = ({ file, onDelete, onRename }: FileCardProps) => {
         </div>
         
         <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-500">Uploaded:</span>
+            <span className="text-sm font-medium">{file.uploadedAt}</span>
+          </div>
+          
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-500">Expires:</span>
             <Badge variant="outline">{file.expiry}</Badge>
