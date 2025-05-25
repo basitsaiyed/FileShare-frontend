@@ -30,28 +30,49 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full">
-        <div className="text-center mb-8">
+        <div className="text-center mb-6">
           <Link to="/" className="flex items-center justify-center space-x-2">
             <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-xl">F</span>
             </div>
             <span className="text-2xl font-bold text-gray-900">FileShare</span>
           </Link>
-          <h2 className="mt-6 text-3xl font-bold text-gray-900">Welcome back</h2>
-          <p className="mt-2 text-gray-600">Sign in to your account</p>
+          <h2 className="mt-4 text-2xl font-bold text-gray-900">Welcome back</h2>
+          <p className="mt-1 text-gray-600">Sign in to your account</p>
         </div>
 
         <Card className="animate-scale-in">
-          <CardHeader>
-            <CardTitle>Log In</CardTitle>
+          <CardHeader className="pb-4">
+            <CardTitle className="text-xl">Log In</CardTitle>
             <CardDescription>
               Enter your email and password to access your account
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
+          <CardContent className="space-y-4">
+            {/* Social Login Buttons - Side by Side */}
+            <div className="grid grid-cols-2 gap-3">
+              <Button variant="outline" type="button" className="w-full">
+                <span className="mr-2">🔍</span>
+                Google
+              </Button>
+              <Button variant="outline" type="button" className="w-full">
+                <span className="mr-2">🐙</span>
+                GitHub
+              </Button>
+            </div>
+            
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">Or sign in with email</span>
+              </div>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-3">
               <div>
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -103,33 +124,13 @@ const Login = () => {
               >
                 {loading ? "Signing in..." : "Sign In"}
               </Button>
-              
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-300" />
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500">Or continue with</span>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-3">
-                <Button variant="outline" type="button">
-                  <span className="mr-2">🔍</span>
-                  Google
-                </Button>
-                <Button variant="outline" type="button">
-                  <span className="mr-2">🐙</span>
-                  GitHub
-                </Button>
-              </div>
             </form>
             
-            <div className="mt-6 text-center">
+            <div className="mt-4 text-center">
               <p className="text-sm text-gray-600">
                 Don't have an account?{" "}
                 <Link to="/signup" className="text-primary hover:text-primary-600 font-medium">
-                  Sign up
+                  Sign up here
                 </Link>
               </p>
             </div>
