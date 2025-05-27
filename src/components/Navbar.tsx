@@ -46,6 +46,11 @@ const Navbar = () => {
                     Get Started
                   </Button>
                 </Link>
+                <Link to="/demo">
+                  <Button variant="outline" className="text-gray-600 hover:text-gray-900">
+                    Try Demo
+                  </Button>
+                </Link>
               </>
             )}
           </div>
@@ -53,3 +58,6 @@ const Navbar = () => {
       </div>
     </nav>
   );
+};
+
+export default Navbar;
