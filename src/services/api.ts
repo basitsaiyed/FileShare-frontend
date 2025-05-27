@@ -24,13 +24,14 @@ interface User {
 
 class ApiService {
   private accessToken: string | null = null;
+  private refreshInProgress = false;
 
   constructor() {
     // Load token from localStorage on initialization
     this.accessToken = localStorage.getItem('accessToken');
   }
 
-  private async makeGraphQLRequest<T>(query: string, variables?: any): Promise<T> {
+  private async makeGraphQLRequest<T>(query: string, variables?: any, skipRefresh = false): Promise<T> {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
@@ -54,6 +55,23 @@ class ApiService {
     }
 
     const result: GraphQLResponse<T> = await response.json();
+
+    // If we get an authentication error and haven't tried refreshing yet
+    if (result.errors && result.errors.some(error => 
+      error.message.includes('unauthorized') || 
+      error.message.includes('invalid token') ||
+      error.message.includes('token expired')
+    ) && !skipRefresh && !this.refreshInProgress) {
+      try {
+        await this.refreshToken();
+        // Retry the original request with the new token
+        return this.makeGraphQLRequest<T>(query, variables, true);
+      } catch (refreshError) {
+        // Refresh failed, user needs to log in again
+        this.logout();
+        throw new Error('Session expired. Please log in again.');
+      }
+    }
 
     if (result.errors && result.errors.length > 0) {
       throw new Error(result.errors[0].message);
@@ -134,28 +152,40 @@ class ApiService {
   }
 
   async refreshToken(): Promise<AuthPayload> {
-    const query = `
-      mutation RefreshToken($token: String!) {
-        refreshToken(token: $token) {
-          accessToken
-          user {
-            id
-            email
+    if (this.refreshInProgress) {
+      // Wait for ongoing refresh to complete
+      await new Promise(resolve => setTimeout(resolve, 100));
+      return this.refreshToken();
+    }
+
+    this.refreshInProgress = true;
+
+    try {
+      const query = `
+        mutation RefreshToken($token: String!) {
+          refreshToken(token: $token) {
+            accessToken
+            user {
+              id
+              email
+            }
           }
         }
-      }
-    `;
+      `;
 
-    // The refresh token is handled via HTTP-only cookies, so we pass an empty string
-    const result = await this.makeGraphQLRequest<{ refreshToken: AuthPayload }>(query, {
-      token: "",
-    });
+      // The refresh token is handled via HTTP-only cookies, so we pass an empty string
+      const result = await this.makeGraphQLRequest<{ refreshToken: AuthPayload }>(query, {
+        token: "",
+      }, true); // Skip refresh retry for this request
 
-    // Update the access token
-    this.accessToken = result.refreshToken.accessToken;
-    localStorage.setItem('accessToken', this.accessToken);
+      // Update the access token
+      this.accessToken = result.refreshToken.accessToken;
+      localStorage.setItem('accessToken', this.accessToken);
 
-    return result.refreshToken;
+      return result.refreshToken;
+    } finally {
+      this.refreshInProgress = false;
+    }
   }
 
   logout(): void {

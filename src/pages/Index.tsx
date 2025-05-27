@@ -46,7 +46,7 @@ const Index = () => {
                   Get Started Free
                 </Button>
               </Link>
-              <Link to="/dashboard">
+              <Link to="/demo">
                 <Button variant="outline" size="lg" className="px-8 py-4 text-lg">
                   Try Demo
                 </Button>
