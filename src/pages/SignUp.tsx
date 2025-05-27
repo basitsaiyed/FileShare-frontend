@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 const SignUp = () => {
@@ -13,6 +14,7 @@ const SignUp = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { register } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,16 +26,14 @@ const SignUp = () => {
       return;
     }
 
-    // Simulate signup
-    setTimeout(() => {
-      if (email && password) {
-        toast.success("Account created successfully!");
-        navigate("/dashboard");
-      } else {
-        toast.error("Please fill in all fields");
-      }
+    try {
+      await register(email, password);
+      navigate("/dashboard");
+    } catch (error) {
+      // Error is already handled in the auth context with toast
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   return (
