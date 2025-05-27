@@ -22,6 +22,12 @@ interface User {
   expiryReminders: boolean;
 }
 
+interface UserStats {
+  totalFiles: number;
+  totalDownloads: number;
+  storageUsed: string;
+}
+
 class ApiService {
   private accessToken: string | null = null;
   private refreshInProgress = false;
@@ -151,6 +157,68 @@ class ApiService {
     return result.me;
   }
 
+  async getUserStats(): Promise<UserStats> {
+    const query = `
+      query UserStats {
+        userStats {
+          totalFiles
+          totalDownloads
+          storageUsed
+        }
+      }
+    `;
+
+    const result = await this.makeGraphQLRequest<{ userStats: UserStats }>(query);
+    return result.userStats;
+  }
+
+  async updateNotificationPreferences(downloadAlerts: boolean, expiryReminders: boolean): Promise<User> {
+    const query = `
+      mutation UpdateNotificationPreferences($downloadAlerts: Boolean!, $expiryReminders: Boolean!) {
+        updateNotificationPreferences(downloadAlerts: $downloadAlerts, expiryReminders: $expiryReminders) {
+          id
+          email
+          createdAt
+          downloadAlerts
+          expiryReminders
+        }
+      }
+    `;
+
+    const result = await this.makeGraphQLRequest<{ updateNotificationPreferences: User }>(query, {
+      downloadAlerts,
+      expiryReminders,
+    });
+
+    return result.updateNotificationPreferences;
+  }
+
+  async changePassword(currentPassword: string, newPassword: string): Promise<boolean> {
+    const query = `
+      mutation ChangePassword($currentPassword: String!, $newPassword: String!) {
+        changePassword(currentPassword: $currentPassword, newPassword: $newPassword)
+      }
+    `;
+
+    const result = await this.makeGraphQLRequest<{ changePassword: boolean }>(query, {
+      currentPassword,
+      newPassword,
+    });
+
+    return result.changePassword;
+  }
+
+  async deleteAccount(): Promise<boolean> {
+    const query = `
+      mutation DeleteAccount {
+        deleteAccount
+      }
+    `;
+
+    const result = await this.makeGraphQLRequest<{ deleteAccount: boolean }>(query);
+    return result.deleteAccount;
+  }
+
   async refreshToken(): Promise<AuthPayload> {
     if (this.refreshInProgress) {
       // Wait for ongoing refresh to complete
@@ -204,4 +272,4 @@ class ApiService {
 }
 
 export const apiService = new ApiService();
-export type { AuthPayload, User };
+export type { AuthPayload, User, UserStats };
