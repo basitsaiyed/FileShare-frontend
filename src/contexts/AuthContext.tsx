@@ -60,7 +60,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (email: string, password: string): Promise<void> => {
     try {
       const authPayload = await apiService.login(email, password);
-      setUser(authPayload.user);
+      // After successful login, fetch complete user profile
+      const userData = await apiService.me();
+      setUser(userData);
       toast.success('Welcome back!');
     } catch (error) {
       console.error('Login failed:', error);
@@ -72,7 +74,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const register = async (email: string, password: string): Promise<void> => {
     try {
       const authPayload = await apiService.register(email, password);
-      setUser(authPayload.user);
+      // After successful registration, fetch complete user profile
+      const userData = await apiService.me();
+      setUser(userData);
       toast.success('Account created successfully!');
     } catch (error) {
       console.error('Registration failed:', error);
