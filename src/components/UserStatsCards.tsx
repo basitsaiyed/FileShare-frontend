@@ -32,22 +32,21 @@ const UserStatsCards = () => {
 
   if (error) {
     console.error('Failed to fetch user stats:', error);
-    // Show fallback stats
     return (
       <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white p-6 rounded-xl border border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900 mb-2">Total Files</h3>
-          <p className="text-3xl font-bold text-primary">--</p>
+          <p className="text-3xl font-bold text-primary">0</p>
         </div>
         
         <div className="bg-white p-6 rounded-xl border border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900 mb-2">Total Downloads</h3>
-          <p className="text-3xl font-bold text-primary">--</p>
+          <p className="text-3xl font-bold text-primary">0</p>
         </div>
         
         <div className="bg-white p-6 rounded-xl border border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900 mb-2">Storage Used</h3>
-          <p className="text-3xl font-bold text-primary">--</p>
+          <p className="text-3xl font-bold text-primary">0 B</p>
         </div>
       </div>
     );

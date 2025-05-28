@@ -9,7 +9,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
-import Dashboard from "./pages/Dashboard";
+import Dashboard from "./components/Dashboard";
 import DemoDashboard from "./pages/DemoDashboard";
 import AccountSettings from "./pages/AccountSettings";
 import Support from "./pages/Support";
