@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,6 +5,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useQueryClient } from "@tanstack/react-query";
 import FileCard from "@/components/FileCard";
 import UploadModal from "@/components/UploadModal";
 import UserStatsCards from "@/components/UserStatsCards";
@@ -41,6 +41,7 @@ interface FileData {
 
 const Dashboard = () => {
   const { user, logout } = useAuth();
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [showUploadModal, setShowUploadModal] = useState(false);
@@ -154,6 +155,8 @@ const Dashboard = () => {
       }
 
       setFiles(prev => prev.filter(file => file.id !== id));
+      // Refresh stats after deletion
+      queryClient.invalidateQueries({ queryKey: ['userStats'] });
       toast.success("File deleted successfully");
     } catch (error) {
       console.error('Error deleting file:', error);
@@ -191,6 +194,8 @@ const Dashboard = () => {
   const handleUploadComplete = () => {
     toast.success("Files uploaded successfully!");
     fetchFiles(); // Refresh the file list
+    // Refresh stats after upload
+    queryClient.invalidateQueries({ queryKey: ['userStats'] });
   };
 
   const handleLogout = () => {

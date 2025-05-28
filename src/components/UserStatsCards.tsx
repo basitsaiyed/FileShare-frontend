@@ -9,13 +9,23 @@ interface UserStats {
 }
 
 const UserStatsCards = () => {
-  const { data: stats, isLoading, error } = useQuery({
+  const { data: stats, isLoading, error, refetch } = useQuery({
     queryKey: ['userStats'],
     queryFn: async (): Promise<UserStats> => {
+      console.log('Fetching user stats...');
       const result = await apiService.getUserStats();
+      console.log('User stats received:', result);
       return result;
     },
+    refetchInterval: 30000, // Refetch every 30 seconds
+    staleTime: 10000, // Consider data stale after 10 seconds
   });
+
+  // Manual refresh function for when needed
+  const handleRefresh = () => {
+    console.log('Manually refreshing stats...');
+    refetch();
+  };
 
   if (isLoading) {
     return (
@@ -33,40 +43,65 @@ const UserStatsCards = () => {
   if (error) {
     console.error('Failed to fetch user stats:', error);
     return (
-      <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-xl border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Total Files</h3>
-          <p className="text-3xl font-bold text-primary">0</p>
+      <div className="mt-12">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-xl font-semibold text-gray-900">Statistics</h2>
+          <button 
+            onClick={handleRefresh}
+            className="text-sm text-blue-600 hover:text-blue-800"
+          >
+            Refresh Stats
+          </button>
         </div>
-        
-        <div className="bg-white p-6 rounded-xl border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Total Downloads</h3>
-          <p className="text-3xl font-bold text-primary">0</p>
-        </div>
-        
-        <div className="bg-white p-6 rounded-xl border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Storage Used</h3>
-          <p className="text-3xl font-bold text-primary">0 B</p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-white p-6 rounded-xl border border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Total Files</h3>
+            <p className="text-3xl font-bold text-primary">-</p>
+            <p className="text-sm text-red-600">Failed to load</p>
+          </div>
+          
+          <div className="bg-white p-6 rounded-xl border border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Total Downloads</h3>
+            <p className="text-3xl font-bold text-primary">-</p>
+            <p className="text-sm text-red-600">Failed to load</p>
+          </div>
+          
+          <div className="bg-white p-6 rounded-xl border border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Storage Used</h3>
+            <p className="text-3xl font-bold text-primary">-</p>
+            <p className="text-sm text-red-600">Failed to load</p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div className="bg-white p-6 rounded-xl border border-gray-200">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">Total Files</h3>
-        <p className="text-3xl font-bold text-primary">{stats?.totalFiles || 0}</p>
+    <div className="mt-12">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-xl font-semibold text-gray-900">Statistics</h2>
+        <button 
+          onClick={handleRefresh}
+          className="text-sm text-blue-600 hover:text-blue-800"
+        >
+          Refresh Stats
+        </button>
       </div>
-      
-      <div className="bg-white p-6 rounded-xl border border-gray-200">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">Total Downloads</h3>
-        <p className="text-3xl font-bold text-primary">{stats?.totalDownloads || 0}</p>
-      </div>
-      
-      <div className="bg-white p-6 rounded-xl border border-gray-200">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">Storage Used</h3>
-        <p className="text-3xl font-bold text-primary">{stats?.storageUsed || "0 B"}</p>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white p-6 rounded-xl border border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Total Files</h3>
+          <p className="text-3xl font-bold text-primary">{stats?.totalFiles ?? 0}</p>
+        </div>
+        
+        <div className="bg-white p-6 rounded-xl border border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Total Downloads</h3>
+          <p className="text-3xl font-bold text-primary">{stats?.totalDownloads ?? 0}</p>
+        </div>
+        
+        <div className="bg-white p-6 rounded-xl border border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Storage Used</h3>
+          <p className="text-3xl font-bold text-primary">{stats?.storageUsed ?? "0 B"}</p>
+        </div>
       </div>
     </div>
   );

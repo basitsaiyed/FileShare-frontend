@@ -1,4 +1,5 @@
 
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -11,31 +12,43 @@ interface QRCodeModalProps {
 }
 
 const QRCodeModal = ({ open, onOpenChange, url, filename }: QRCodeModalProps) => {
-  // Mock QR code - in a real app, you'd generate this
-  const qrCodeData = `data:image/svg+xml,${encodeURIComponent(`
-    <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
-      <rect width="200" height="200" fill="white"/>
-      <rect x="20" y="20" width="160" height="160" fill="none" stroke="black" stroke-width="2"/>
-      <rect x="30" y="30" width="20" height="20" fill="black"/>
-      <rect x="60" y="30" width="20" height="20" fill="black"/>
-      <rect x="90" y="30" width="20" height="20" fill="black"/>
-      <rect x="150" y="30" width="20" height="20" fill="black"/>
-      <rect x="30" y="60" width="20" height="20" fill="black"/>
-      <rect x="90" y="60" width="20" height="20" fill="black"/>
-      <rect x="150" y="60" width="20" height="20" fill="black"/>
-      <rect x="30" y="90" width="20" height="20" fill="black"/>
-      <rect x="60" y="90" width="20" height="20" fill="black"/>
-      <rect x="120" y="90" width="20" height="20" fill="black"/>
-      <rect x="150" y="90" width="20" height="20" fill="black"/>
-      <rect x="30" y="120" width="20" height="20" fill="black"/>
-      <rect x="90" y="120" width="20" height="20" fill="black"/>
-      <rect x="150" y="120" width="20" height="20" fill="black"/>
-      <rect x="30" y="150" width="20" height="20" fill="black"/>
-      <rect x="60" y="150" width="20" height="20" fill="black"/>
-      <rect x="90" y="150" width="20" height="20" fill="black"/>
-      <rect x="150" y="150" width="20" height="20" fill="black"/>
-    </svg>
-  `)}`;
+  const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (open && url) {
+      generateQRCode();
+    }
+  }, [open, url]);
+
+  const generateQRCode = async () => {
+    try {
+      setIsLoading(true);
+      console.log('Generating QR code for URL:', url);
+      
+      const response = await fetch('http://localhost:8080/api/qr/generate', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate QR code');
+      }
+
+      const blob = await response.blob();
+      const qrUrl = URL.createObjectURL(blob);
+      setQrCodeUrl(qrUrl);
+    } catch (error) {
+      console.error('Error generating QR code:', error);
+      toast.error("Failed to generate QR code");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const copyLink = () => {
     navigator.clipboard.writeText(url);
@@ -50,11 +63,21 @@ const QRCodeModal = ({ open, onOpenChange, url, filename }: QRCodeModalProps) =>
         </DialogHeader>
         
         <div className="flex flex-col items-center space-y-4">
-          <img 
-            src={qrCodeData} 
-            alt="QR Code" 
-            className="w-48 h-48 border border-gray-200 rounded-lg"
-          />
+          {isLoading ? (
+            <div className="w-48 h-48 border border-gray-200 rounded-lg flex items-center justify-center">
+              <div className="text-lg">Generating QR...</div>
+            </div>
+          ) : qrCodeUrl ? (
+            <img 
+              src={qrCodeUrl} 
+              alt="QR Code" 
+              className="w-48 h-48 border border-gray-200 rounded-lg"
+            />
+          ) : (
+            <div className="w-48 h-48 border border-gray-200 rounded-lg flex items-center justify-center">
+              <div className="text-lg text-gray-500">Failed to load QR</div>
+            </div>
+          )}
           
           <div className="w-full space-y-2">
             <p className="text-sm text-gray-600 text-center">
