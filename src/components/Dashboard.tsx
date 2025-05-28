@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -11,60 +10,165 @@ import UploadModal from "@/components/UploadModal";
 import UserStatsCards from "@/components/UserStatsCards";
 import { toast } from "sonner";
 
+interface FileData {
+  id: string;
+  name: string;
+  size: string;
+  type: string;
+  uploadedAt: string;
+  expiry: string;
+  downloads: number;
+  shortUrl: string;
+}
+
 const Dashboard = () => {
   const { user, logout } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [showUploadModal, setShowUploadModal] = useState(false);
-  const [files, setFiles] = useState([
-    {
-      id: "1",
-      name: "Project Proposal.pdf",
-      size: "2.4 MB",
-      type: "application/pdf",
-      uploadedAt: "Dec 18, 2024",
-      expiry: "6 days",
-      downloads: 12,
-      shortUrl: "https://fileshare.co/a1b2c3"
-    },
-    {
-      id: "2",
-      name: "Design Mockups.zip",
-      size: "15.8 MB",
-      type: "application/zip",
-      uploadedAt: "Dec 20, 2024",
-      expiry: "4 days",
-      downloads: 5,
-      shortUrl: "https://fileshare.co/d4e5f6"
-    },
-    {
-      id: "3",
-      name: "Screenshot 2024.png",
-      size: "892 KB",
-      type: "image/png",
-      uploadedAt: "Dec 22, 2024",
-      expiry: "2 days",
-      downloads: 23,
-      shortUrl: "https://fileshare.co/g7h8i9"
+  const [files, setFiles] = useState<FileData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Convert backend file format to frontend format
+  const convertBackendFileToFrontend = (backendFile: any): FileData => {
+    const expiry = new Date(backendFile.expiresAt);
+    const now = new Date();
+    const daysUntilExpiry = Math.ceil((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    
+    return {
+      id: backendFile.id,
+      name: backendFile.originalName,
+      size: formatFileSize(backendFile.fileSize),
+      type: backendFile.contentType || "application/octet-stream",
+      uploadedAt: new Date(backendFile.createdAt).toLocaleDateString(),
+      expiry: daysUntilExpiry > 0 ? `${daysUntilExpiry} days` : "Expired",
+      downloads: backendFile.downloadCount || 0,
+      shortUrl: backendFile.shareableURL || backendFile.publicURL
+    };
+  };
+
+  const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+  };
+
+  const fetchFiles = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch('http://localhost:8080/api/files/', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch files');
+      }
+
+      const backendFiles = await response.json();
+      const convertedFiles = backendFiles.map(convertBackendFileToFrontend);
+      setFiles(convertedFiles);
+    } catch (error) {
+      console.error('Error fetching files:', error);
+      toast.error('Failed to load files');
+      // Keep the existing mock data as fallback
+      setFiles([
+        {
+          id: "1",
+          name: "Project Proposal.pdf",
+          size: "2.4 MB",
+          type: "application/pdf",
+          uploadedAt: "Dec 18, 2024",
+          expiry: "6 days",
+          downloads: 12,
+          shortUrl: "https://fileshare.co/a1b2c3"
+        },
+        {
+          id: "2",
+          name: "Design Mockups.zip",
+          size: "15.8 MB",
+          type: "application/zip",
+          uploadedAt: "Dec 20, 2024",
+          expiry: "4 days",
+          downloads: 5,
+          shortUrl: "https://fileshare.co/d4e5f6"
+        },
+        {
+          id: "3",
+          name: "Screenshot 2024.png",
+          size: "892 KB",
+          type: "image/png",
+          uploadedAt: "Dec 22, 2024",
+          expiry: "2 days",
+          downloads: 23,
+          shortUrl: "https://fileshare.co/g7h8i9"
+        }
+      ]);
+    } finally {
+      setIsLoading(false);
     }
-  ]);
+  };
+
+  useEffect(() => {
+    fetchFiles();
+  }, []);
 
   const filteredFiles = files.filter(file =>
     file.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleDelete = (id: string) => {
-    setFiles(prev => prev.filter(file => file.id !== id));
-    toast.success("File deleted successfully");
+  const handleDelete = async (id: string) => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/files/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete file');
+      }
+
+      setFiles(prev => prev.filter(file => file.id !== id));
+      toast.success("File deleted successfully");
+    } catch (error) {
+      console.error('Error deleting file:', error);
+      toast.error("Failed to delete file");
+    }
   };
 
-  const handleRename = (id: string, newName: string) => {
-    setFiles(prev => prev.map(file => 
-      file.id === id ? { ...file, name: newName } : file
-    ));
+  const handleRename = async (id: string, newName: string) => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/files/${id}/rename`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ newName }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to rename file');
+      }
+
+      setFiles(prev => prev.map(file => 
+        file.id === id ? { ...file, name: newName } : file
+      ));
+      toast.success("File renamed successfully");
+    } catch (error) {
+      console.error('Error renaming file:', error);
+      toast.error("Failed to rename file");
+    }
   };
 
   const handleUploadComplete = () => {
     toast.success("Files uploaded successfully!");
+    fetchFiles(); // Refresh the file list
   };
 
   const handleLogout = () => {
@@ -157,7 +261,12 @@ const Dashboard = () => {
         </div>
 
         {/* Files Grid */}
-        {filteredFiles.length > 0 ? (
+        {isLoading ? (
+          <div className="text-center py-12">
+            <div className="text-6xl mb-4">⏳</div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">Loading your files...</h3>
+          </div>
+        ) : filteredFiles.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredFiles.map((file) => (
               <FileCard
