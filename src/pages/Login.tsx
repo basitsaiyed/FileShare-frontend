@@ -52,11 +52,11 @@ const Login = () => {
           <CardContent className="space-y-4">
             {/* Social Login Buttons - Side by Side */}
             <div className="grid grid-cols-2 gap-3">
-              <Button variant="outline" type="button" className="w-full">
+              <Button disabled variant="outline" type="button" className="w-full">
                 <span className="mr-2">🔍</span>
                 Google
               </Button>
-              <Button variant="outline" type="button" className="w-full">
+              <Button disabled variant="outline" type="button" className="w-full">
                 <span className="mr-2">🐙</span>
                 GitHub
               </Button>

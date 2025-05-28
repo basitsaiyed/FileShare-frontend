@@ -142,6 +142,7 @@ const FileCard = ({ file, onDelete, onRename }: FileCardProps) => {
           onOpenChange={setShowQR}
           url={file.shortUrl}
           filename={file.name}
+          slug={file.shortUrl.split('/').pop() || ""}
         />
       </CardContent>
     </Card>

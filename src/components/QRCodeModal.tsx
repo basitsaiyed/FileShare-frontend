@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -9,30 +8,30 @@ interface QRCodeModalProps {
   onOpenChange: (open: boolean) => void;
   url: string;
   filename: string;
+  slug: string; // Added slug parameter
 }
 
-const QRCodeModal = ({ open, onOpenChange, url, filename }: QRCodeModalProps) => {
+const QRCodeModal = ({ open, onOpenChange, url, filename, slug }: QRCodeModalProps) => {
   const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (open && url) {
+    if (open && slug) {
       generateQRCode();
     }
-  }, [open, url]);
+  }, [open, slug]);
 
   const generateQRCode = async () => {
     try {
       setIsLoading(true);
-      console.log('Generating QR code for URL:', url);
+      console.log('Generating QR code for slug:', slug);
       
-      const response = await fetch('http://localhost:8080/api/qr/generate', {
-        method: 'POST',
+      // Updated endpoint to use slug parameter
+      const response = await fetch(`http://localhost:8080/api/files/${slug}/qr`, {
+        method: 'GET', // Changed to GET since we're using path parameter
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ url }),
       });
 
       if (!response.ok) {
