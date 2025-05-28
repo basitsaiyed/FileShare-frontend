@@ -1,5 +1,5 @@
 
-const API_BASE_URL = 'http://localhost:8080'; // Update this to your backend URL
+const API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL}`; // Update this to your backend URL
 
 interface GraphQLResponse<T> {
   data?: T;

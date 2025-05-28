@@ -27,7 +27,7 @@ const QRCodeModal = ({ open, onOpenChange, url, filename, slug }: QRCodeModalPro
       console.log('Generating QR code for slug:', slug);
       
       // Updated endpoint to use slug parameter
-      const response = await fetch(`http://localhost:8080/api/files/${slug}/qr`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/files/${slug}/qr`, {
         method: 'GET', // Changed to GET since we're using path parameter
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,

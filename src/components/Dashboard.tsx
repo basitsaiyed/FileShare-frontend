@@ -62,7 +62,7 @@ const Dashboard = () => {
       uploadedAt: new Date(backendFile.CreatedAt).toLocaleDateString(),
       expiry: daysUntilExpiry > 0 ? `${daysUntilExpiry} days` : "Expired",
       downloads: backendFile.DownloadCount || 0,
-      shortUrl: backendFile.ShareableURL || `http://localhost:8080/d/${backendFile.DownloadSlug}`
+      shortUrl: backendFile.ShareableURL || `${import.meta.env.VITE_API_BASE_URL}/d/${backendFile.DownloadSlug}`
     };
   };
 
@@ -79,7 +79,7 @@ const Dashboard = () => {
       setIsLoading(true);
       console.log('Fetching files from backend...');
       
-      const response = await fetch('http://localhost:8080/api/files/', {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/files/`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
           'Content-Type': 'application/json',
@@ -143,7 +143,7 @@ const Dashboard = () => {
     try {
       console.log('Deleting file:', id);
       
-      const response = await fetch(`http://localhost:8080/api/files/${id}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/files/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
@@ -168,7 +168,7 @@ const Dashboard = () => {
     try {
       console.log('Renaming file:', id, 'to:', newName);
       
-      const response = await fetch(`http://localhost:8080/api/files/${id}/rename`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/files/${id}/rename`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,

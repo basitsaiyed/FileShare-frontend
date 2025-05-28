@@ -61,7 +61,7 @@ const UploadModal = ({ open, onOpenChange, onUploadComplete }: UploadModalProps)
     const formData = new FormData();
     formData.append('file', file);
     
-    const response = await fetch('http://localhost:8080/api/files/upload', {
+    const response = await fetch('${import.meta.env.VITE_API_BASE_URL}/api/files/upload', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,

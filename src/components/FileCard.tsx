@@ -52,7 +52,7 @@ const FileCard = ({ file, onDelete, onRename }: FileCardProps) => {
     // Extract slug from shortUrl to download
     const slug = file.shortUrl.split('/').pop();
     if (slug) {
-      window.open(`http://localhost:8080/api/files/download/${slug}`, '_blank');
+      window.open(`${import.meta.env.VITE_API_BASE_URL}/api/files/download/${slug}`, '_blank');
     }
   };
 
