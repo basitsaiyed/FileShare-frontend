@@ -1,9 +1,9 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import QRCodeModal from "./QRCodeModal";
 
@@ -48,6 +48,14 @@ const FileCard = ({ file, onDelete, onRename }: FileCardProps) => {
     setIsRenaming(false);
   };
 
+  const handleDownload = () => {
+    // Extract slug from shortUrl to download
+    const slug = file.shortUrl.split('/').pop();
+    if (slug) {
+      window.open(`http://localhost:8080/api/files/download/${slug}`, '_blank');
+    }
+  };
+
   return (
     <Card className="hover-lift">
       <CardContent className="p-6">
@@ -79,6 +87,9 @@ const FileCard = ({ file, onDelete, onRename }: FileCardProps) => {
               <Button variant="ghost" size="sm">⋯</Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="bg-white border border-gray-200 shadow-lg">
+              <DropdownMenuItem onClick={handleDownload}>
+                Download
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setIsRenaming(true)}>
                 Rename
               </DropdownMenuItem>

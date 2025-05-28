@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +10,19 @@ import FileCard from "@/components/FileCard";
 import UploadModal from "@/components/UploadModal";
 import UserStatsCards from "@/components/UserStatsCards";
 import { toast } from "sonner";
+
+interface BackendFile {
+  id: string;
+  original_name: string;
+  file_size: number;
+  content_type: string;
+  created_at: string;
+  expires_at: string;
+  download_count: number;
+  download_slug: string;
+  url: string;
+  shareable_url: string;
+}
 
 interface FileData {
   id: string;
@@ -29,20 +43,20 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   // Convert backend file format to frontend format
-  const convertBackendFileToFrontend = (backendFile: any): FileData => {
-    const expiry = new Date(backendFile.expiresAt);
+  const convertBackendFileToFrontend = (backendFile: BackendFile): FileData => {
+    const expiry = new Date(backendFile.expires_at);
     const now = new Date();
     const daysUntilExpiry = Math.ceil((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
     
     return {
       id: backendFile.id,
-      name: backendFile.originalName,
-      size: formatFileSize(backendFile.fileSize),
-      type: backendFile.contentType || "application/octet-stream",
-      uploadedAt: new Date(backendFile.createdAt).toLocaleDateString(),
+      name: backendFile.original_name,
+      size: formatFileSize(backendFile.file_size),
+      type: backendFile.content_type || "application/octet-stream",
+      uploadedAt: new Date(backendFile.created_at).toLocaleDateString(),
       expiry: daysUntilExpiry > 0 ? `${daysUntilExpiry} days` : "Expired",
-      downloads: backendFile.downloadCount || 0,
-      shortUrl: backendFile.shareableURL || backendFile.publicURL
+      downloads: backendFile.download_count || 0,
+      shortUrl: backendFile.shareable_url || `http://localhost:8080/d/${backendFile.download_slug}`
     };
   };
 
@@ -57,6 +71,8 @@ const Dashboard = () => {
   const fetchFiles = async () => {
     try {
       setIsLoading(true);
+      console.log('Fetching files from backend...');
+      
       const response = await fetch('http://localhost:8080/api/files/', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
@@ -64,49 +80,23 @@ const Dashboard = () => {
         },
       });
 
+      console.log('Response status:', response.status);
+
       if (!response.ok) {
-        throw new Error('Failed to fetch files');
+        throw new Error(`Failed to fetch files: ${response.status}`);
       }
 
-      const backendFiles = await response.json();
+      const backendFiles: BackendFile[] = await response.json();
+      console.log('Backend files:', backendFiles);
+      
       const convertedFiles = backendFiles.map(convertBackendFileToFrontend);
+      console.log('Converted files:', convertedFiles);
+      
       setFiles(convertedFiles);
     } catch (error) {
       console.error('Error fetching files:', error);
       toast.error('Failed to load files');
-      // Keep the existing mock data as fallback
-      setFiles([
-        {
-          id: "1",
-          name: "Project Proposal.pdf",
-          size: "2.4 MB",
-          type: "application/pdf",
-          uploadedAt: "Dec 18, 2024",
-          expiry: "6 days",
-          downloads: 12,
-          shortUrl: "https://fileshare.co/a1b2c3"
-        },
-        {
-          id: "2",
-          name: "Design Mockups.zip",
-          size: "15.8 MB",
-          type: "application/zip",
-          uploadedAt: "Dec 20, 2024",
-          expiry: "4 days",
-          downloads: 5,
-          shortUrl: "https://fileshare.co/d4e5f6"
-        },
-        {
-          id: "3",
-          name: "Screenshot 2024.png",
-          size: "892 KB",
-          type: "image/png",
-          uploadedAt: "Dec 22, 2024",
-          expiry: "2 days",
-          downloads: 23,
-          shortUrl: "https://fileshare.co/g7h8i9"
-        }
-      ]);
+      setFiles([]); // Clear files on error instead of showing mock data
     } finally {
       setIsLoading(false);
     }
@@ -122,6 +112,8 @@ const Dashboard = () => {
 
   const handleDelete = async (id: string) => {
     try {
+      console.log('Deleting file:', id);
+      
       const response = await fetch(`http://localhost:8080/api/files/${id}`, {
         method: 'DELETE',
         headers: {
@@ -143,6 +135,8 @@ const Dashboard = () => {
 
   const handleRename = async (id: string, newName: string) => {
     try {
+      console.log('Renaming file:', id, 'to:', newName);
+      
       const response = await fetch(`http://localhost:8080/api/files/${id}/rename`, {
         method: 'PUT',
         headers: {

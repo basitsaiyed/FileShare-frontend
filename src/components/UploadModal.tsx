@@ -57,32 +57,60 @@ const UploadModal = ({ open, onOpenChange, onUploadComplete }: UploadModalProps)
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
+  const uploadFile = async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const response = await fetch('http://localhost:8080/api/files/upload', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to upload ${file.name}`);
+    }
+
+    return response.json();
+  };
+
   const handleUpload = async () => {
     if (files.length === 0) return;
     
     setUploading(true);
     setUploadProgress(0);
     
-    // Simulate upload progress
-    const interval = setInterval(() => {
-      setUploadProgress(prev => {
-        if (prev >= 90) {
-          clearInterval(interval);
-          return 90;
+    try {
+      const totalFiles = files.length;
+      let uploadedFiles = 0;
+
+      // Upload files sequentially to avoid overwhelming the server
+      for (const file of files) {
+        try {
+          await uploadFile(file);
+          uploadedFiles++;
+          setUploadProgress((uploadedFiles / totalFiles) * 100);
+        } catch (error) {
+          console.error(`Failed to upload ${file.name}:`, error);
+          toast.error(`Failed to upload ${file.name}`);
         }
-        return prev + 10;
-      });
-    }, 200);
-    
-    // Simulate upload completion
-    setTimeout(() => {
-      setUploadProgress(100);
-      toast.success(`${files.length} file(s) uploaded successfully!`);
-      setFiles([]);
+      }
+
+      if (uploadedFiles > 0) {
+        toast.success(`${uploadedFiles} file(s) uploaded successfully!`);
+        setFiles([]);
+        onUploadComplete();
+        onOpenChange(false);
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error('Upload failed');
+    } finally {
       setUploading(false);
-      onUploadComplete();
-      onOpenChange(false);
-    }, 2000);
+      setUploadProgress(0);
+    }
   };
 
   return (
@@ -161,7 +189,7 @@ const UploadModal = ({ open, onOpenChange, onUploadComplete }: UploadModalProps)
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span>Uploading...</span>
-                <span>{uploadProgress}%</span>
+                <span>{Math.round(uploadProgress)}%</span>
               </div>
               <Progress value={uploadProgress} className="w-full" />
             </div>
