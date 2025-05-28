@@ -12,16 +12,20 @@ import UserStatsCards from "@/components/UserStatsCards";
 import { toast } from "sonner";
 
 interface BackendFile {
-  id: string;
-  original_name: string;
-  file_size: number;
-  content_type: string;
-  created_at: string;
-  expires_at: string;
-  download_count: number;
-  download_slug: string;
-  url: string;
-  shareable_url: string;
+  ID: string;
+  OriginalName: string;
+  FileSize: number;
+  ContentType: string;
+  CreatedAt: string;
+  ExpiresAt: string;
+  DownloadCount: number;
+  DownloadSlug: string;
+  URL: string;
+  ShareableURL: string;
+}
+
+interface BackendResponse {
+  files: BackendFile[];
 }
 
 interface FileData {
@@ -38,25 +42,26 @@ interface FileData {
 const Dashboard = () => {
   const { user, logout } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedFilter, setSelectedFilter] = useState("all");
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [files, setFiles] = useState<FileData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Convert backend file format to frontend format
   const convertBackendFileToFrontend = (backendFile: BackendFile): FileData => {
-    const expiry = new Date(backendFile.expires_at);
+    const expiry = new Date(backendFile.ExpiresAt);
     const now = new Date();
     const daysUntilExpiry = Math.ceil((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
     
     return {
-      id: backendFile.id,
-      name: backendFile.original_name,
-      size: formatFileSize(backendFile.file_size),
-      type: backendFile.content_type || "application/octet-stream",
-      uploadedAt: new Date(backendFile.created_at).toLocaleDateString(),
+      id: backendFile.ID,
+      name: backendFile.OriginalName,
+      size: formatFileSize(backendFile.FileSize),
+      type: backendFile.ContentType || "application/octet-stream",
+      uploadedAt: new Date(backendFile.CreatedAt).toLocaleDateString(),
       expiry: daysUntilExpiry > 0 ? `${daysUntilExpiry} days` : "Expired",
-      downloads: backendFile.download_count || 0,
-      shortUrl: backendFile.shareable_url || `http://localhost:8080/d/${backendFile.download_slug}`
+      downloads: backendFile.DownloadCount || 0,
+      shortUrl: backendFile.ShareableURL || `http://localhost:8080/d/${backendFile.DownloadSlug}`
     };
   };
 
@@ -86,8 +91,12 @@ const Dashboard = () => {
         throw new Error(`Failed to fetch files: ${response.status}`);
       }
 
-      const backendFiles: BackendFile[] = await response.json();
-      console.log('Backend files:', backendFiles);
+      const backendResponse: BackendResponse = await response.json();
+      console.log('Backend response:', backendResponse);
+      
+      // Extract files from the response object
+      const backendFiles = backendResponse.files || [];
+      console.log('Backend files array:', backendFiles);
       
       const convertedFiles = backendFiles.map(convertBackendFileToFrontend);
       console.log('Converted files:', convertedFiles);
@@ -96,7 +105,7 @@ const Dashboard = () => {
     } catch (error) {
       console.error('Error fetching files:', error);
       toast.error('Failed to load files');
-      setFiles([]); // Clear files on error instead of showing mock data
+      setFiles([]);
     } finally {
       setIsLoading(false);
     }
@@ -106,9 +115,28 @@ const Dashboard = () => {
     fetchFiles();
   }, []);
 
-  const filteredFiles = files.filter(file =>
-    file.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filter files based on search term and file type
+  const filteredFiles = files.filter(file => {
+    const matchesSearch = file.name.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    if (selectedFilter === "all") return matchesSearch;
+    
+    const fileType = file.type.toLowerCase();
+    switch (selectedFilter) {
+      case "images":
+        return matchesSearch && fileType.includes('image');
+      case "documents":
+        return matchesSearch && (fileType.includes('pdf') || fileType.includes('doc') || fileType.includes('text'));
+      case "archives":
+        return matchesSearch && (fileType.includes('zip') || fileType.includes('rar') || fileType.includes('7z'));
+      case "videos":
+        return matchesSearch && fileType.includes('video');
+      case "audio":
+        return matchesSearch && fileType.includes('audio');
+      default:
+        return matchesSearch;
+    }
+  });
 
   const handleDelete = async (id: string) => {
     try {
@@ -246,11 +274,43 @@ const Dashboard = () => {
             />
           </div>
           
-          <div className="flex gap-2">
-            <Button variant="outline">All Files</Button>
-            <Button variant="outline">Images</Button>
-            <Button variant="outline">Documents</Button>
-            <Button variant="outline">Archives</Button>
+          <div className="flex gap-2 flex-wrap">
+            <Button 
+              variant={selectedFilter === "all" ? "default" : "outline"}
+              onClick={() => setSelectedFilter("all")}
+            >
+              All Files
+            </Button>
+            <Button 
+              variant={selectedFilter === "images" ? "default" : "outline"}
+              onClick={() => setSelectedFilter("images")}
+            >
+              Images
+            </Button>
+            <Button 
+              variant={selectedFilter === "documents" ? "default" : "outline"}
+              onClick={() => setSelectedFilter("documents")}
+            >
+              Documents
+            </Button>
+            <Button 
+              variant={selectedFilter === "videos" ? "default" : "outline"}
+              onClick={() => setSelectedFilter("videos")}
+            >
+              Videos
+            </Button>
+            <Button 
+              variant={selectedFilter === "audio" ? "default" : "outline"}
+              onClick={() => setSelectedFilter("audio")}
+            >
+              Audio
+            </Button>
+            <Button 
+              variant={selectedFilter === "archives" ? "default" : "outline"}
+              onClick={() => setSelectedFilter("archives")}
+            >
+              Archives
+            </Button>
           </div>
         </div>
 
@@ -275,15 +335,15 @@ const Dashboard = () => {
           <div className="text-center py-12">
             <div className="text-6xl mb-4">📁</div>
             <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              {searchTerm ? "No files found" : "No files uploaded yet"}
+              {searchTerm || selectedFilter !== "all" ? "No files found" : "No files uploaded yet"}
             </h3>
             <p className="text-gray-600 mb-6">
-              {searchTerm 
-                ? "Try adjusting your search terms"
+              {searchTerm || selectedFilter !== "all"
+                ? "Try adjusting your search terms or filters"
                 : "Upload your first file to get started"
               }
             </p>
-            {!searchTerm && (
+            {!searchTerm && selectedFilter === "all" && (
               <Button 
                 onClick={() => setShowUploadModal(true)}
                 className="bg-primary hover:bg-primary-600"
