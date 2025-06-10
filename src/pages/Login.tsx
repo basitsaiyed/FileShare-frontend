@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -11,6 +10,7 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [oauthLoading, setOauthLoading] = useState<string | null>(null);
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -25,6 +25,21 @@ const Login = () => {
       // Error is already handled in the auth context with toast
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleOAuthLogin = async (provider: string) => {
+    setOauthLoading(provider);
+    
+    try {
+      // Get your backend base URL from environment or config
+      const backendUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+      
+      // Redirect to your Go backend OAuth endpoint
+      window.location.href = `${backendUrl}/auth/${provider}`;
+    } catch (error) {
+      console.error(`${provider} OAuth error:`, error);
+      setOauthLoading(null);
     }
   };
 
@@ -52,13 +67,33 @@ const Login = () => {
           <CardContent className="space-y-4">
             {/* Social Login Buttons - Side by Side */}
             <div className="grid grid-cols-2 gap-3">
-              <Button disabled variant="outline" type="button" className="w-full">
-                <span className="mr-2">🔍</span>
-                Google
+              <Button 
+                variant="outline" 
+                type="button" 
+                className="w-full google-btn"
+                onClick={() => handleOAuthLogin("google")}
+                disabled={oauthLoading !== null}
+              >
+                {oauthLoading === "google" ? (
+                  <span className="mr-2">⏳</span>
+                ) : (
+                  <span className="mr-2">🔍</span>
+                )}
+                {oauthLoading === "google" ? "Loading..." : "Google"}
               </Button>
-              <Button disabled variant="outline" type="button" className="w-full">
-                <span className="mr-2">🐙</span>
-                GitHub
+              <Button 
+                variant="outline" 
+                type="button" 
+                className="w-full github-btn"
+                onClick={() => handleOAuthLogin("github")}
+                disabled={oauthLoading !== null}
+              >
+                {oauthLoading === "github" ? (
+                  <span className="mr-2">⏳</span>
+                ) : (
+                  <span className="mr-2">🐙</span>
+                )}
+                {oauthLoading === "github" ? "Loading..." : "GitHub"}
               </Button>
             </div>
             
@@ -119,7 +154,7 @@ const Login = () => {
               <Button 
                 type="submit" 
                 className="w-full bg-primary hover:bg-primary-600"
-                disabled={loading}
+                disabled={loading || oauthLoading !== null}
               >
                 {loading ? "Signing in..." : "Sign In"}
               </Button>

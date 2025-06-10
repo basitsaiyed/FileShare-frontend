@@ -9,10 +9,12 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
+import OAuthSuccess from "./pages/OAuthSuccess";
 import Dashboard from "./components/Dashboard";
 import DemoDashboard from "./pages/DemoDashboard";
 import AccountSettings from "./pages/AccountSettings";
 import Support from "./pages/Support";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +30,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
+            <Route path="/auth/success" element={<OAuthSuccess />} />
             <Route path="/demo" element={<DemoDashboard />} />
             <Route path="/dashboard" element={
               <ProtectedRoute>
@@ -40,6 +43,7 @@ const App = () => (
               </ProtectedRoute>
             } />
             <Route path="/support" element={<Support />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
