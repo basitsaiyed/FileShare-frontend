@@ -14,7 +14,10 @@ import Dashboard from "./components/Dashboard";
 import DemoDashboard from "./pages/DemoDashboard";
 import AccountSettings from "./pages/AccountSettings";
 import Support from "./pages/Support";
+import About from "./pages/About";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
+import Security from "./pages/Security";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,7 +46,10 @@ const App = () => (
               </ProtectedRoute>
             } />
             <Route path="/support" element={<Support />} />
+            <Route path="/about" element={<About />} />Add commentMore actions
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/terms-of-service" element={<TermsOfService />} />
+            <Route path="/security" element={<Security />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

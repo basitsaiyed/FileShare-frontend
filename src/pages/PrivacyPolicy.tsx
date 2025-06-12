@@ -11,7 +11,7 @@ const PrivacyPolicy = () => {
         <div className="space-y-8">
           <div className="text-center">
             <h1 className="text-4xl font-bold text-gray-900 mb-4">Privacy Policy</h1>
-            <p className="text-lg text-gray-600">Last updated: June 10, 2025</p>
+            <p className="text-lg text-gray-600">Last updated: June 12, 2025</p>
           </div>
 
           <div className="prose prose-lg max-w-none">
@@ -130,8 +130,7 @@ const PrivacyPolicy = () => {
               </p>
               <div className="mt-4 p-4 bg-gray-50 rounded-lg">
                 <p className="text-gray-700">
-                  Email: privacy@fileshare.com<br/>
-                  Address: 123 Privacy Lane, Data City, DC 12345
+                  Email: <a href="mailto:basitsaiyed19123@gmail.com" className="text-primary hover:text-primary-600">basitsaiyed19123@gmail.com</a><br/>
                 </p>
               </div>
             </section>

@@ -19,20 +19,21 @@ const Footer = () => {
           </div>
           
           <div>
-            <h3 className="font-semibold text-gray-900 mb-4">Product</h3>
+            {/* <h3 className="font-semibold text-gray-900 mb-4">Product</h3>
             <ul className="space-y-2">
               <li><Link to="#" className="text-gray-600 hover:text-gray-900 text-sm">Features</Link></li>
               <li><Link to="#" className="text-gray-600 hover:text-gray-900 text-sm">Pricing</Link></li>
               <li><Link to="#" className="text-gray-600 hover:text-gray-900 text-sm">API</Link></li>
-            </ul>
+            </ul> */}
           </div>
           
           <div>
-            <h3 className="font-semibold text-gray-900 mb-4">Company</h3>
+            <h3 className="font-semibold text-gray-900 mb-4">About</h3>
             <ul className="space-y-2">
-              <li><Link to="#" className="text-gray-600 hover:text-gray-900 text-sm">About</Link></li>
-              <li><Link to="#" className="text-gray-600 hover:text-gray-900 text-sm">Contact</Link></li>
-              <li><Link to="#" className="text-gray-600 hover:text-gray-900 text-sm">Blog</Link></li>
+              <li><Link to="https://www.linkedin.com/in/basit-saiyed/" className="text-gray-600 hover:text-gray-900 text-sm" target="_blank" rel="noopener noreferrer">Basit Saiyed</Link></li>
+              <li><Link to="/about" className="text-gray-600 hover:text-gray-900 text-sm">About</Link></li>
+              <li><Link to="mailto:basitsaiyed19123@gmail.com" className="text-gray-600 hover:text-gray-900 text-sm">Contact</Link></li>
+              <li><Link to="https://github.com/basitsaiyed" className="text-gray-600 hover:text-gray-900 text-sm" target="_blank" rel="noopener noreferrer">GitHub</Link></li>
             </ul>
           </div>
           
@@ -40,15 +41,15 @@ const Footer = () => {
             <h3 className="font-semibold text-gray-900 mb-4">Legal</h3>
             <ul className="space-y-2">
               <li><Link to="/privacy-policy" className="text-gray-600 hover:text-gray-900 text-sm">Privacy Policy</Link></li>
-              <li><Link to="#" className="text-gray-600 hover:text-gray-900 text-sm">Terms of Service</Link></li>
-              <li><Link to="#" className="text-gray-600 hover:text-gray-900 text-sm">Security</Link></li>
+              <li><Link to="/terms-of-service" className="text-gray-600 hover:text-gray-900 text-sm">Terms of Service</Link></li>
+              <li><Link to="/security" className="text-gray-600 hover:text-gray-900 text-sm">Security</Link></li>
             </ul>
           </div>
         </div>
         
         <div className="border-t border-gray-200 mt-8 pt-8 text-center">
           <p className="text-gray-600 text-sm">
-            © 2024 FileShare. All rights reserved.
+            © 2025 FileShare. All rights reserved.
           </p>
         </div>
       </div>
