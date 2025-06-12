@@ -84,25 +84,25 @@ const Support = () => {
 
         {/* Quick Help Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+          {/* <Card className="hover:shadow-lg transition-shadow cursor-pointer">
             <CardHeader>
               <HelpCircle className="h-8 w-8 text-primary mb-2" />
               <CardTitle>Getting Started</CardTitle>
               <CardDescription>Learn the basics of using FileShare</CardDescription>
             </CardHeader>
-          </Card>
+          </Card> */}
 
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+          {/* <Card className="hover:shadow-lg transition-shadow cursor-pointer">
             <CardHeader>
               <FileText className="h-8 w-8 text-primary mb-2" />
               <CardTitle>Documentation</CardTitle>
               <CardDescription>Detailed guides and API documentation</CardDescription>
             </CardHeader>
-          </Card>
+          </Card> */}
 
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer w-full">
             <CardHeader>
-              <Shield className="h-8 w-8 text-primary mb-2" />
+              <Shield className="h-8  text-primary mb-2" />
               <CardTitle>Security & Privacy</CardTitle>
               <CardDescription>Learn about our security measures</CardDescription>
             </CardHeader>
@@ -187,18 +187,18 @@ const Support = () => {
               
               <div className="flex items-center space-x-3 text-gray-600">
                 <Mail className="h-5 w-5" />
-                <span>support@fileshare.com</span>
+                <span>basitsaiyed19123@gmail.com</span>
               </div>
               
-              <div className="flex items-center space-x-3 text-gray-600">
+              {/* <div className="flex items-center space-x-3 text-gray-600">
                 <MessageCircle className="h-5 w-5" />
                 <span>Live chat (Mon-Fri, 9 AM - 6 PM EST)</span>
-              </div>
+              </div> */}
               
-              <div className="flex items-center space-x-3 text-gray-600">
+              {/* <div className="flex items-center space-x-3 text-gray-600">
                 <Phone className="h-5 w-5" />
                 <span>+1 (555) 123-4567</span>
-              </div>
+              </div> */}
             </div>
 
             {/* Status Badge */}
