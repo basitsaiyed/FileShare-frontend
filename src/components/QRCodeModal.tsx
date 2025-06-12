@@ -8,30 +8,34 @@ interface QRCodeModalProps {
   onOpenChange: (open: boolean) => void;
   url: string;
   filename: string;
-  slug: string; // Added slug parameter
+  isExpired?: boolean;
 }
 
-const QRCodeModal = ({ open, onOpenChange, url, filename, slug }: QRCodeModalProps) => {
+const QRCodeModal = ({ open, onOpenChange, url, filename, isExpired = false }: QRCodeModalProps) => {
   const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (open && slug) {
+    if (open && url && !isExpired) {
       generateQRCode();
+    } else if (open && isExpired) {
+      setQrCodeUrl(""); // Clear any existing QR code
     }
-  }, [open, slug]);
+  }, [open, url, isExpired]);
 
   const generateQRCode = async () => {
     try {
       setIsLoading(true);
-      console.log('Generating QR code for slug:', slug);
+      console.log('Generating QR code for URL:', url);
       
       // Updated endpoint to use slug parameter
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/files/${slug}/qr`, {
-        method: 'GET', // Changed to GET since we're using path parameter
+      const response = await fetch('http://localhost:8080/api/qr/generate', {
+        method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+          'Content-Type': 'application/json',
         },
+        body: JSON.stringify({ url }),
       });
 
       if (!response.ok) {
@@ -50,6 +54,10 @@ const QRCodeModal = ({ open, onOpenChange, url, filename, slug }: QRCodeModalPro
   };
 
   const copyLink = () => {
+    if (isExpired) {
+      toast.error("Cannot copy link - file has expired");
+      return;
+    }
     navigator.clipboard.writeText(url);
     toast.success("Link copied to clipboard!");
   };
@@ -58,11 +66,22 @@ const QRCodeModal = ({ open, onOpenChange, url, filename, slug }: QRCodeModalPro
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>QR Code for {filename}</DialogTitle>
+           <DialogTitle>Add commentMore actions
+            QR Code for {filename}
+            {isExpired && <span className="text-red-600 text-sm ml-2">(Expired)</span>}
+          </DialogTitle>
         </DialogHeader>
         
         <div className="flex flex-col items-center space-y-4">
-          {isLoading ? (
+           {isExpired ? (
+            <div className="w-48 h-48 border border-red-200 rounded-lg flex items-center justify-center bg-red-50">
+              <div className="text-center">
+                <div className="text-4xl mb-2">⚠️</div>
+                <div className="text-lg text-red-600 font-semibold">File Expired</div>
+                <div className="text-sm text-red-500">QR code unavailable</div>
+              </div>
+            </div>
+          ) : isLoading ? (
             <div className="w-48 h-48 border border-gray-200 rounded-lg flex items-center justify-center">
               <div className="text-lg">Generating QR...</div>
             </div>
@@ -79,16 +98,33 @@ const QRCodeModal = ({ open, onOpenChange, url, filename, slug }: QRCodeModalPro
           )}
           
           <div className="w-full space-y-2">
-            <p className="text-sm text-gray-600 text-center">
-              Scan this QR code to access the file
-            </p>
+            {isExpired ? (
+              <div className="text-center">
+                <p className="text-sm text-red-600 mb-3">
+                  This file has expired and cannot be shared
+                </p>
+                <div className="bg-red-50 p-3 rounded-lg border border-red-200">
+                  <p className="text-sm text-red-700">⚠️ Link is no longer accessible</p>
+                </div>
+              </div>
+            ) : (
+              <>
+                <p className="text-sm text-gray-600 text-center">
+                  Scan this QR code to access the file
+                </p>
+                
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <p className="text-sm font-mono text-gray-800 break-all">{url}</p>
+                </div>
+              </>
+            )}
             
-            <div className="bg-gray-50 p-3 rounded-lg">
-              <p className="text-sm font-mono text-gray-800 break-all">{url}</p>
-            </div>
-            
-            <Button onClick={copyLink} className="w-full">
-              Copy Link
+            <Button 
+              onClick={copyLink} 
+              className="w-full"
+              disabled={isExpired}
+            >
+              {isExpired ? "Link Expired" : "Copy Link"}
             </Button>
           </div>
         </div>

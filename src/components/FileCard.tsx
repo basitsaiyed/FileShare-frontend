@@ -27,6 +27,8 @@ const FileCard = ({ file, onDelete, onRename }: FileCardProps) => {
   const [isRenaming, setIsRenaming] = useState(false);
   const [newName, setNewName] = useState(file.name);
 
+  const isExpired = file.expiry === "Expired" || file.expiry.includes("Expired");
+
   const getFileIcon = (type: string) => {
     if (type.includes('image')) return '🖼️';
     if (type.includes('pdf')) return '📄';
@@ -36,8 +38,20 @@ const FileCard = ({ file, onDelete, onRename }: FileCardProps) => {
   };
 
   const copyLink = () => {
+    if (isExpired) {
+      toast.error("Cannot copy link - file has expired");
+      return;
+    }
     navigator.clipboard.writeText(file.shortUrl);
     toast.success("Link copied to clipboard!");
+  };
+
+  const handleShowQR = () => {
+    if (isExpired) {
+      toast.error("Cannot generate QR code - file has expired");
+      return;
+    }
+    setShowQR(true);
   };
 
   const handleRename = () => {
@@ -49,6 +63,10 @@ const FileCard = ({ file, onDelete, onRename }: FileCardProps) => {
   };
 
   const handleDownload = () => {
+    if (isExpired) {
+      toast.error("Cannot download - file has expired");
+      return;
+    }
     // Extract slug from shortUrl to download
     const slug = file.shortUrl.split('/').pop();
     if (slug) {
@@ -57,7 +75,7 @@ const FileCard = ({ file, onDelete, onRename }: FileCardProps) => {
   };
 
   return (
-    <Card className="hover-lift">
+    <Card className={`hover-lift ${isExpired ? 'opacity-60' : ''}`}>
       <CardContent className="p-6">
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center space-x-3">
@@ -87,13 +105,21 @@ const FileCard = ({ file, onDelete, onRename }: FileCardProps) => {
               <Button variant="ghost" size="sm">⋯</Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="bg-white border border-gray-200 shadow-lg">
-              <DropdownMenuItem onClick={handleDownload}>
+              <DropdownMenuItem
+                onClick={handleDownload}
+                disabled={isExpired}
+                className={isExpired ? 'opacity-50 cursor-not-allowed' : ''}
+              >
                 Download
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setIsRenaming(true)}>
                 Rename
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setShowQR(true)}>
+               <DropdownMenuItem
+                onClick={handleShowQR}
+                disabled={isExpired}
+                className={isExpired ? 'opacity-50 cursor-not-allowed' : ''}
+              >
                 Show QR Code
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => onDelete(file.id)} className="text-red-600">
@@ -111,7 +137,9 @@ const FileCard = ({ file, onDelete, onRename }: FileCardProps) => {
           
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-500">Expires:</span>
-            <Badge variant="outline">{file.expiry}</Badge>
+            <Badge variant={isExpired ? "destructive" : "outline"}>
+              {file.expiry}
+            </Badge>
           </div>
           
           <div className="flex items-center justify-between">
@@ -124,11 +152,12 @@ const FileCard = ({ file, onDelete, onRename }: FileCardProps) => {
               onClick={copyLink}
               size="sm" 
               className="flex-1 bg-primary hover:bg-primary-600"
+              disabled={isExpired}
             >
-              Copy Link
+              {isExpired ? "Link Expired" : "Copy Link"}
             </Button>
             <Button 
-              onClick={() => setShowQR(true)}
+              onClick={handleShowQR}
               variant="outline" 
               size="sm"
             >
@@ -142,7 +171,7 @@ const FileCard = ({ file, onDelete, onRename }: FileCardProps) => {
           onOpenChange={setShowQR}
           url={file.shortUrl}
           filename={file.name}
-          slug={file.shortUrl.split('/').pop() || ""}
+          isExpired={isExpired}
         />
       </CardContent>
     </Card>
