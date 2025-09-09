@@ -29,7 +29,7 @@ const QRCodeModal = ({ open, onOpenChange, url, filename, isExpired = false }: Q
       console.log('Generating QR code for URL:', url);
       
       // Updated endpoint to use slug parameter
-      const response = await fetch('http://localhost:8080/api/qr/generate', {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}api/qr/generate`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
