@@ -6,12 +6,13 @@ import { toast } from "sonner";
 interface QRCodeModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  slug: string;
   url: string;
   filename: string;
   isExpired?: boolean;
 }
 
-const QRCodeModal = ({ open, onOpenChange, url, filename, isExpired = false }: QRCodeModalProps) => {
+const QRCodeModal = ({ open, onOpenChange, url, filename, slug, isExpired = false }: QRCodeModalProps) => {
   const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -30,7 +31,7 @@ const QRCodeModal = ({ open, onOpenChange, url, filename, isExpired = false }: Q
 
       // Instead of sending {url}, just call the backend slug endpoint
       const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/api/files/${filename}/qr`,
+        `${import.meta.env.VITE_API_BASE_URL}/api/files/${slug}/qr`,
         {
           method: "GET",
           headers: {
