@@ -26,27 +26,28 @@ const QRCodeModal = ({ open, onOpenChange, url, filename, isExpired = false }: Q
   const generateQRCode = async () => {
     try {
       setIsLoading(true);
-      console.log('Generating QR code for URL:', url);
-      
-      // Updated endpoint to use slug parameter
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/qr/generate`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ url }),
-      });
+      console.log('Generating QR code for file slug:', url);
+
+      // Instead of sending {url}, just call the backend slug endpoint
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/api/files/${filename}/qr`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        }
+      );
 
       if (!response.ok) {
-        throw new Error('Failed to generate QR code');
+        throw new Error("Failed to generate QR code");
       }
 
       const blob = await response.blob();
       const qrUrl = URL.createObjectURL(blob);
       setQrCodeUrl(qrUrl);
     } catch (error) {
-      console.error('Error generating QR code:', error);
+      console.error("Error generating QR code:", error);
       toast.error("Failed to generate QR code");
     } finally {
       setIsLoading(false);
