@@ -170,6 +170,7 @@ const FileCard = ({ file, onDelete, onRename }: FileCardProps) => {
           open={showQR} 
           onOpenChange={setShowQR}
           url={file.shortUrl}
+          slug={file.shortUrl.split("/").pop() || ""}
           filename={file.name}
           isExpired={isExpired}
         />
